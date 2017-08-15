@@ -1,0 +1,34 @@
+.Background 
+{
+	width: 100vw;
+	height: 100vh;
+	margin: 0;
+	padding: 0;
+	.Background_spacer 
+	{
+		width: 100vw;
+  		height: 55px;
+	}
+	.Background_container 
+	{
+		margin: 10px auto;
+		width: 90%;
+		max-width: 1300px;
+	}
+	.Background_title 
+	{
+		font-family: 'Open Sans', sans-serif;
+  		font-weight: 400;
+  		font-size: 20px;
+  		color: #4d4d4d;
+  		margin: 10px 0;
+	}
+}
+.Background-white 
+{
+	background-color: #F6F6F6;
+}
+.Background-blue 
+{
+	background-color: #0079BF;
+}

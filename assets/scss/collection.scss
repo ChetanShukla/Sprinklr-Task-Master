@@ -1,0 +1,74 @@
+.Collection 
+{
+	display: flex;
+	align-items: center;
+	justify-content: flex-start;
+	flex-wrap: wrap;
+	width: 100%;
+	.Collection_item 
+	{
+		display: block;
+		position: relative;
+		height: 85px;
+		margin: 0 20px 20px 0;
+		border-radius: $border-radius;
+		cursor: pointer;
+		padding: 10px 2% 10px 2%;
+		width: 250px;
+		background-color: #E2E4E6;
+		&:hover 
+		{
+			background-color: #FFFFFF; 
+  			border: 3px solid #26CA7D;
+		}
+	}
+	.Collection_title 
+	{
+		@include openSans($medium, $white);
+		margin: 0;
+		padding: 0;
+	}
+	.Collection_addproject 
+	{
+		@include openSans($medium, $black);
+		margin: 0;
+		padding: 7px;
+		border: 0;
+		outline: 0;
+		border-radius: $border-radius;
+		background-color: $white;
+	}
+	.Collection_options 
+	{
+		padding: 0;
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		justify-content: flex-start;
+		margin: 10px auto;
+	}
+	.Collection_newItem 
+	{
+		height: 85px;
+		margin: 0 20px 20px 0;
+		border-radius: $border-radius;
+		cursor: pointer;
+		padding: 10px 2% 10px 2%;
+		width: 250px;
+		background-color: #E2E4E6;
+		@include openSans($medium, $black);
+		&:hover 
+		{
+			background-color: #F6F8FA; 
+  			border: 3px solid #26CA7D;
+		}
+	}
+	.Collection_newItem-active 
+	{
+		background-color: #CDD2D4 !important;
+		&:hover 
+		{
+			background-color: #CDD2D4 !important;
+		}
+	}
+}
