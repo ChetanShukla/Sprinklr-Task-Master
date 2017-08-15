@@ -1,0 +1,195 @@
+<!doctype html>
+
+<html lang="en">
+
+<head>
+
+	<link rel="apple-touch-icon" sizes="72x72" href="public/images/logo.png">
+	<link rel="apple-touch-icon" sizes="114x114" href="public/images/logo.png">
+	<link rel="apple-touch-icon" sizes="144x144" href="public/images/logo.png">
+	<link rel="shortcut icon" type="image/png" href="public/images/logo.png">
+
+	<title>Task Management</title>
+	<meta name="author" content="Chetan Shukla">
+	<meta charset="UTF-8">
+	<link href='https://fonts.googleapis.com/css?family=Open+Sans:600' rel='stylesheet' type='text/css'>
+	<link rel="stylesheet" type="text/css" href="public/css/trello.css">
+
+</head>
+
+<template id="trello-project">
+	<div class="Background Background-white">
+	<hr class="pad20">
+		<div class="Background_spacer"></div>
+		<div class="project">
+			<div
+				class="Overlay"
+				v-on:click.self="showTaskModule = !showTaskModule"
+				v-show="showTaskModule"
+			>
+				<div class="TaskModule">
+					<div class="TaskModule_exit">
+						<svg
+							class="Cancel"
+							v-on:click="showTaskModule = !showTaskModule"
+						>
+							<line x1="0" y1="0" x2="15" y2="15"/>
+							<line x1="0" y1="15" x2="15" y2="0"/>
+						</svg>
+					</div>
+					<input
+						class="Input TaskModule_title"
+						v-model="selectedTask.title"
+						type="text"
+					></input>
+					<h5 class="TaskModule_list">in list <strong>{{ selectedListTitle }}</strong></h5>
+					<h6 class="TaskModule_descriptionTitle">Description</h6>
+					<p
+						class="TaskModule_description"
+						v-if="selectedTask.description.length > 0"
+						v-show="!editTaskDescription"
+						v-on:click="editTaskDescription = !editTaskDescription"
+					>
+						{{ selectedTask.description }}
+					</p>
+					<p
+						class="TaskModule_description"
+						v-else
+						v-on:click="editTaskDescription = !editTaskDescription"
+						v-show="!editTaskDescription"
+					>
+						Add a description...
+					</p>
+					<textarea
+						class="TextArea"
+						v-model="inProgressTaskDescription"
+						v-show="editTaskDescription"
+						type="text"
+						v-focus="editTaskDescription"
+						v-on:keyup.enter.prevent="saveNewTaskDescription"
+					></textarea>
+					<div
+						class="TaskModule_options"
+						v-show="editTaskDescription"
+					>
+						<button
+							class="Button"
+							v-on:click="saveNewTaskDescription"
+						>
+							Save
+						</button>
+						<svg
+							class="Cancel"
+							v-on:click="editTaskDescription = !editTaskDescription"
+						>
+							<line x1="0" y1="0" x2="15" y2="15"/>
+							<line x1="0" y1="15" x2="15" y2="0"/>
+						</svg>
+					</div>
+				</div>
+			</div>
+
+			<div class="project_info">
+				<input class="project_title" v-model="name"></input>
+			</div>
+			<div class="ListContainer">
+
+				<div class="List" v-for="(list_id, list) in lists" id="{{ list_id }}" data-drag-type="list"
+					v-drag-and-drop
+					drag-start="pickupList"
+					drag-enter="changeListTarget"
+					drop="placeListInTarget"
+					drag-type="list"
+				>
+					<input class="Input" v-model="list.title"></input>
+					<div class="List_tasks">
+						<div class="Task" v-for="(task_id, task) in list.tasks" track-by=$index id="{{ list_id }}-{{ task_id }}" data-drag-type="task"
+							v-drag-and-drop
+							drag-start="pickupTask"
+							drag-enter="changeTaskTarget"
+							drag-end="placeTaskInTarget"
+							drag-type="task"
+							v-on:click="editTask(list_id, task_id)"
+							v-show="!task.placeholder"
+						>
+							<h3 class="Task_title">{{task.title}}</h3>
+						</div>
+					</div>
+					<h5
+						class="List_addTask"
+						v-show="!list.addTask"
+						v-on:click.stop.prevent="list.addTask = !list.addTask"
+					>
+						Add a task...
+					</h5>
+					<textarea class="TextArea" v-model="list.newItem" type="text" v-on:keyup.enter.prevent="addTask(list_id)" v-show="list.addTask" v-el:new-task v-focus="list.addTask"></textarea>
+					<div v-show="list.addTask" class="List_newTaskOptions">
+						<button class="Button" v-on:click="addTask(list_id)">Add</button>
+						<svg class="Cancel" v-on:click="cancelNewTask(list_id)">
+							<line x1="0" y1="0" x2="15" y2="15"/>
+							<line x1="0" y1="15" x2="15" y2="0"/>
+						</svg>
+					</div>
+				</div>
+
+				<div class="CreateList" v-bind:class="{ 'CreateList-active': newList }">
+					<h3 class="CreateList_title" v-show="!newList" v-on:click="newList = !newList">Add a member...</h3>
+					<input class="CreateList_input" v-model="newListTitle" type="text" placeholder="Add a list..." v-on:keyup.enter="addList" v-focus="newList" v-show="newList"></input>
+					<div class="CreateList_options" v-show="newList">
+						<button class="Button" v-on:click="addList">Save</button>
+						<svg class="Cancel" v-on:click="cancelNewList">
+							<line x1="0" y1="0" x2="15" y2="15"/>
+							<line x1="0" y1="15" x2="15" y2="0"/>
+						</svg>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+</template>
+
+<template id="trello-project-collection">
+	<div class="Background Background-white">
+		<div class="Background_spacer"></div>
+		<hr class="pad20">
+
+		<div class="Background_container">
+			<h1 class="Background_title">Projects</h1>
+			<div class="Collection">
+				<div class="Collection_item" v-for="(project_id, project) in projects" v-link="{ path: '/project/' + project_id }">
+					<h1 class="Collection_title">{{ project.name }}</h1>
+				</div>
+				<div class="Collection_newItem" v-bind:class="{ 'Collection_newItem-active': newproject }" v-on:click="activateNewproject()">
+					<h1 class="Collection_title" v-show="!newproject">Create a project...</h1>
+					<input class="Collection_addproject"  v-model="newprojectTitle" v-on:keyup.enter.prevent="createNewproject()" placeholder="Create a project..." v-show="newproject" v-focus="newproject"></input>
+					<div class="Collection_options" v-show="newproject">
+						<button class="Button" v-on:click.stop="createNewproject()">Save</button>
+						<svg class="Cancel" v-on:click.stop="newproject = !newproject">
+							<line x1="0" y1="0" x2="15" y2="15"/>
+							<line x1="0" y1="15" x2="15" y2="0"/>
+						</svg>
+					</div>
+				</div>
+			</div>
+		</div>
+
+	</div>
+</template>
+
+<body>
+	<div id="trello-app">
+		<nav class="Nav">
+			<div class="Nav_projects Nav_button" v-link="{ path: '/' }">
+				Projects
+			</div>
+			<img class="Nav_logo" src="public/images/Sprinklr.png">
+		</nav>
+		<router-view></router-view>
+	</div>
+
+	<script type="text/javascript" src="public/js/trello.js"></script>
+
+</body>
+
+</html>
